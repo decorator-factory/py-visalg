@@ -174,6 +174,8 @@ class Array(AlgElement):
     pointer: int = None
     pointer_size: int = 8
     pointer_color: tuple = (0, 0, 0)
+    fill: object = (255, 255, 255)
+    outline: object = (0, 0, 0)
 
     def __post_init__(self):
         self.highlight = {}
@@ -225,9 +227,9 @@ class Array(AlgElement):
             else:
                 cell.contents = str(value)
 
-            cell.outline = (0, 0, 0)
-            cell.textcolor = (0, 0, 0)
-            cell.fill = (255, 255, 255)
+            cell.outline = self.outline
+            cell.textcolor = self.outline
+            cell.fill = self.fill
 
             for color, cells_set in cells_to_highlight.items():
                 if n in cells_set:
@@ -279,7 +281,7 @@ class Grid(AlgElement):
         for i in range(self.height):
             row = Array(px, py, self.width,
                         cell_size=self.cell_size,
-                        intercell_space=intercell_space)
+                        intercell_space=self.intercell_space)
             self.rows.append(row)
 
 
