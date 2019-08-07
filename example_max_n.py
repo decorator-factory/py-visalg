@@ -16,6 +16,7 @@ def get_n_max(img: AlgImage, top: Array, bottom: Array):
 
         for j, old_max in enumerate(maximums):
             array_bottom.highlight["green"] = [j]
+            array_bottom.highlight["green"] = [j]
             img.capture()
             if x > old_max:
                 array_bottom.highlight["green"] = []
