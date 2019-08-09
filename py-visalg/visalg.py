@@ -22,7 +22,7 @@ class AlgImage:
         self.frames = []
 
 
-    def __lshift__(self, other):
+    def connect(self, other):
         # add an element
         # img << elm1 << elm2 << ...
         if not isinstance(other, AlgElement):
@@ -34,7 +34,7 @@ class AlgImage:
         return self
 
 
-    def __rshift__(self, other):
+    def disconnect(self, other):
         # remove an element
         # img >> elm1 >> elm2 >> ...
         if not isinstance(other, AlgElement):
@@ -46,8 +46,8 @@ class AlgImage:
 
         return self
 
-    connect = __lshift__
-    disconnect = __rshift__
+    __lshift__ = connect
+    __rshift__ = disconnect
 
 
     def capture(self):
@@ -86,6 +86,11 @@ class AlgElement:
 
 
 @dataclass
+class ColorFill:
+    color: object = (0, 0, 0)
+
+
+@dataclass
 class Rectangle(AlgElement):
     x: int
     y: int
@@ -103,6 +108,7 @@ class Rectangle(AlgElement):
     def center(self):
         return (self.x + self.width // 2,
                 self.y + self.height // 2)
+
 
 @dataclass
 class Cell(AlgElement):
@@ -143,23 +149,27 @@ class Cell(AlgElement):
         outer = self.rect_outer
         inner = self.rect_inner
         outer.outline = outer.fill = self.outline
-        inner.outline = inner.fill = self.fill
+        if isinstance(self.contents, ColorFill):
+            inner.outline = inner.fill = self.contents.color
+        else:
+            inner.outline = inner.fill = self.fill
 
         outer.render(image, draw)
         inner.render(image, draw)
 
-        #print(f"render {self.contents} at {self.center}")
-        w, h = draw.textsize(self.contents, self.font)
-        draw.text((self.center[0]-w//2, self.center[1]-h//2),
-                  self.contents,
-                  fill=self.textcolor,
-                  font=self.font)
+
+        if not isinstance(self.contents, ColorFill):
+            text = str(self.contents)
+            w, h = draw.textsize(text, self.font)
+            draw.text((self.center[0]-w//2, self.center[1]-h//2),
+                      text,
+                      fill=self.textcolor,
+                      font=self.font)
 
     @property
     def center(self):
         return (self.x + self.width//2,
                 self.y + self.height//2)
-
 
 
 @dataclass()
@@ -169,6 +179,7 @@ class Array(AlgElement):
     length: int
     font: ImageFont
     cell_size: int = 96
+    margin: int = 8
     intercell_space: int = 8
     vertical: bool = False
     pointer: int = None
@@ -188,6 +199,7 @@ class Array(AlgElement):
         for n in range(self.length):
             cell = Cell(px, py,
                         self.cell_size, self.cell_size,
+                        margin=self.margin,
                         font=self.font)
             self.cells.append(cell)
 
@@ -220,20 +232,15 @@ class Array(AlgElement):
 
 
         for n, cell in enumerate(self.cells):
-            value = self.array[n]
-
-            if value is None:
-                cell.contents = ""
-            else:
-                cell.contents = str(value)
+            cell.contents = self.array[n]
 
             cell.outline = self.outline
             cell.textcolor = self.outline
-            cell.fill = self.fill
+
 
             for color, cells_set in cells_to_highlight.items():
                 if n in cells_set:
-                    cell.outline = cell.textcolor    = color
+                    cell.outline = cell.textcolor = color
 
             cell.render(image, draw)
 
@@ -269,8 +276,11 @@ class Grid(AlgElement):
     font: ImageFont
     width: int
     height: int
+    margin: int = 8
     cell_size: int = 96
     intercell_space: int = 8
+    outline: object = (0, 0, 0)
+    fill: object = (255, 255, 255)
 
     def __post_init__(self):
         self.rows = []
@@ -280,11 +290,54 @@ class Grid(AlgElement):
 
         for i in range(self.height):
             row = Array(px, py, self.width,
+                        font=self.font,
+                        margin=self.margin,
                         cell_size=self.cell_size,
-                        intercell_space=self.intercell_space)
+                        intercell_space=self.intercell_space,
+                        fill=self.fill, outline=self.outline)
             self.rows.append(row)
+            py += step
+
+        self.highlight = {}
 
 
-    def __getitem__(self, index:(int, int)):
+    def __getitem__(self, index: (int, int)):
         x, y = index
-        return self.rows[y].contents[x]
+        return self.rows[y].array[x]
+
+    def __setitem__(self, index:(int, int), value):
+        x, y = index
+        #print(f'set @{x,y} to {value}')
+        self.rows[y].array[x] = value
+        #print(self[x, y])
+
+
+    def get_highlights(self) -> list:
+        """
+        highlight:
+        (x, y) -- a single point (x, y)
+        ((x1, x2), y) -- a line from (x1,y) to (x2,y)
+        (x, (y1, y2)) -- a line from (x,y1) to (x,y2)
+        ((x1, x2), (y1,y2)) -- a region from (x1,y1) to (x2,y2)
+        """
+        hls = [{} for _ in self.rows]
+
+        for color, table in self.highlight.items():
+            for a, b in table:
+                isint_a = isinstance(a, int)
+                isint_b = isinstance(b, int)
+                if isint_b:
+                    b = (b, b)
+
+                for y in range(b[0], b[1]+1):
+                    if color not in hls[y]:
+                        hls[y][color] = []
+                    hls[y][color].append(a)
+
+        return hls
+
+
+    def render(self, image, draw):
+        for hl, row in zip(self.get_highlights(), self.rows):
+            row.highlight = hl
+            row.render(image, draw)
