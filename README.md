@@ -64,15 +64,15 @@ object, and `draw` is a `PIL.ImageDraw` object for that image.
 ### Bubble sort
 See `example_bubblesort.py`
 
-![Bubble sort](https://github.com/decorator-factory/py-visalg/blob/master/examples/bubblesort.gif?raw=true)
+![Bubble sort](https://github.com/decorator-factory/py-visalg/blob/master/visalg/examples/bubblesort.gif?raw=true)
 
 ### Finding top N numbers in an array
 See `example_max_n.py`
 
-![Top N numbers](https://github.com/decorator-factory/py-visalg/blob/master/examples/max_n.gif?raw=true)
+![Top N numbers](https://github.com/decorator-factory/py-visalg/blob/master/visalg/examples/max_n.gif?raw=true)
 
 ### Solving a maze
 See `example_maze.py`
 
-![Maze solving](https://github.com/decorator-factory/py-visalg/blob/master/examples/maze.gif?raw=true)
+![Maze solving](https://github.com/decorator-factory/py-visalg/blob/master/visalg/examples/maze.gif?raw=true)
 
