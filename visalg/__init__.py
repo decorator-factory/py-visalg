@@ -1,2 +1,1 @@
-from visalg import *
-name = "visalg"
+from .visalg import AlgImage, AlgElement, ColorFill, Rectangle, Cell, Array, Grid
