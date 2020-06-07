@@ -7,12 +7,12 @@ Algorithm visualization library for Python.
 
 This is a host object or a 'canvas' for all the visual elements.
 
-####Attributes
+#### Attributes
 * `width`, `height` — width and height of the image (in pixels)
 * `bgcolor` — the background color (in PIL format)
 * `frames` — a list with all the captured frames
 
-####Methods
+#### Methods
 * `capture()` — save a frame to `frames`
 
 * `save_png(folder, prefix)` — save the frames as individual PNG 
@@ -25,7 +25,7 @@ files:`folder/prefix0.png`, `folder/prefix1.png` and so on.
 like:  
   `image << array_top << grid << array_cache`
 
-####Explanation
+#### Explanation
 When you call `AlgImage.capture()`, the `AlgImage` object iterates over all the
 visual elements and renders them by providing them with handlers to the image.
 
@@ -35,7 +35,7 @@ visual elements and renders them by providing them with handlers to the image.
 `AlgElement` is a parent object for all the visual elements like cells, arrays,
 grids and so on. 
 
-####Methods
+#### Methods
 
 * `render(image, draw)` — render the element to an image. `image` is a `PIL.Image`
 object, and `draw` is a `PIL.ImageDraw` object for that image.
@@ -47,7 +47,7 @@ object, and `draw` is a `PIL.ImageDraw` object for that image.
 
 ### The `Cell` object
 
-####Attributes
+#### Attributes
 
 * `x`, `y` — position of the top left corner of the cell (in pixels)
 * `width`, `height` — width and height of the cell (in pixels)
